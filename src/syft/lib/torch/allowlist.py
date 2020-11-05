@@ -1,12 +1,14 @@
 # stdlib
 from typing import Dict
 from typing import Union
+from ..misc.union import PointerUnion
 
 allowlist: Dict[str, Union[str, Dict[str, str]]] = {}  # (path: str, return_type:type)
 
 # --------------------------------------------------------------------------------------
 # SECTION - Tensor methods which are intentionally disabled
 # --------------------------------------------------------------------------------------
+allowlist["torch.Tensor.item"] = PointerUnion.from_qualnames("syft.lib.python.Float", "syft.lib.python.Int", "syft.lib.python.Bool")
 
 # SECTION - Tensor methods which are insecure
 # allowlist["torch.Tensor.__array__"] = SECURITY WARNING: DO NOT ADD TO ALLOW LIST
@@ -622,7 +624,6 @@ allowlist["torch.tensor"] = "torch.Tensor"
 # SECTION - Tensor methods with specific issues or require a special test combination
 # --------------------------------------------------------------------------------------
 # required for MNIST but marked as skip in the allowlist_test.json
-allowlist["torch.Tensor.item"] = "syft.lib.python.Float"  # Union[bool, int, float]
 
 
 # hashes are not matching
