@@ -65,7 +65,7 @@ class MemoryStore(ObjectStore):
         return key in self._objects.keys()
 
     @syft_decorator(typechecking=True, prohibit_args=False)
-    def __getitem__(self, key: UID) -> AbstractStorableObject:
+    def __getitem__(self, key: UID) -> object:
         try:
             return self._objects[key]
         except Exception as e:

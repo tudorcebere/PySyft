@@ -5,12 +5,14 @@ package syft.core.store;
 import "proto/core/common/common_object.proto";
 import "google/protobuf/any.proto";
 
-message StoreGenericObject {
-  StorableObject storable_object = 1;
-  StoreObject store_object = 2;
+messages StorableObject {
+    syft.lib.torch storable_tensor = 1;
+    BytesStorableObject storable_bytes = 2;
+    syft.lib.python storable_primitive = 3;
+    // here should go all the types on which we can't touch
 }
 
-message StorableObject {
+message BytesStorableObject {
   syft.core.common.UID id = 1;
   string obj_type = 2;
   string schematic_qualname = 3;
@@ -19,24 +21,3 @@ message StorableObject {
   repeated string tags = 6;
 }
 
-message StoreObject {
-  syft.core.store.Container container = 1;
-  syft.core.store.SearchEngine search_engine = 2;
-}
-
-message Container {
-  syft.core.store.DictContainer dict_container = 1;
-  syft.core.store.SqlContainer sql_container = 2;
-  syft.core.store.GridContainer grid_container = 3;
-}
-
-message SearchEngine {}
-
-message DictContainer {
-  // the values can be only syft.SyftObject
-  map<int64, google.protobuf.Any> dict_mapping = 1;
-}
-
-message SqlContainer {}
-
-message GridContainer {}

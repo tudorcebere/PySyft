@@ -4,3 +4,10 @@ package syft.lib.python;
 import "proto/core/common/common_object.proto";
 
 message SyNone { syft.core.common.UID id = 1; }
+
+message StorableNone {
+    syft.core.common.UID id = 1;
+    SyNone data = 2;
+    string description = 3;
+    repeated string tags = 4;
+}

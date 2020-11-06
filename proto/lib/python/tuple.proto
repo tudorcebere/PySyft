@@ -8,3 +8,10 @@ message Tuple {
   repeated syft.core.store.StorableObject data = 1;
   syft.core.common.UID id = 2;
 }
+
+message StorableTuple {
+    syft.core.common.UID id = 1;
+    Tuple data = 2;
+    string description = 3;
+    repeated string tags = 4;
+}

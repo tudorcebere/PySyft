@@ -8,3 +8,10 @@ message Complex {
   float imag = 2;
   syft.core.common.UID id = 3;
 }
+
+message StorableComplex {
+    syft.core.common.UID id = 1;
+    Complex data = 2;
+    string description = 3;
+    repeated string tags = 4;
+}

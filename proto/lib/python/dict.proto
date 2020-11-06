@@ -9,3 +9,10 @@ message Dict {
   repeated syft.core.store.StorableObject values = 2;
   syft.core.common.UID id = 3;
 }
+
+message StorableBool {
+    syft.core.common.UID id = 1;
+    Dict data = 2;
+    string description = 3;
+    repeated string tags = 4;
+}

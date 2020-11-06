@@ -26,6 +26,7 @@ def test_serde_storable_obj() -> None:
     assert obj2.tags == obj.tags
     assert obj2.description == obj.description
 
+
 # def test_serde_storable_obj_with_wrapped_class() -> None:
 #     """Ensure that storable object serialization works wrapping non-syft classes (like np.ndarray)"""
 #

@@ -7,3 +7,10 @@ message Int {
   int64 data = 1;
   syft.core.common.UID id = 2;
 }
+
+message StorableInt {
+    syft.core.common.UID id = 1;
+    Int data = 2;
+    string description = 3;
+    repeated string tags = 4;
+}

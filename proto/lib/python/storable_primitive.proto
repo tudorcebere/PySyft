@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package syft.lib.python;
+import "proto/core/lib/python/bool.proto";
+import "proto/core/lib/python/complex.proto";
+import "proto/core/lib/python/dict.proto";
+import "proto/core/lib/python/float.proto";
+import "proto/core/lib/python/int.proto";
+import "proto/core/lib/python/list.proto";
+import "proto/core/lib/python/none.proto";
+import "proto/core/lib/python/string.proto";
+import "proto/core/lib/python/tuple.proto";
+
+
+message StorablePrimitive {
+   syft.lib.python.bool bool = 1;
+   syft.lib.python.complex complex = 2;
+   syft.lib.python.dict dict = 3;
+   syft.lib.python.float float = 4;
+   syft.lib.python.int int = 5;
+   syft.lib.python.list list = 6;
+   syft.lib.python.none none = 7;
+   syft.lib.python.string string = 8;
+   syft.lib.python.tuple tuple = 9;
+}

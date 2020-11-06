@@ -7,3 +7,10 @@ message String {
   string data = 1;
   syft.core.common.UID id = 2;
 }
+
+message StorableString {
+    syft.core.common.UID id = 1;
+    String data = 2;
+    string description = 3;
+    repeated string tags = 4;
+}

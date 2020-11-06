@@ -7,3 +7,10 @@ message Float {
   float data = 1;
   syft.core.common.UID id = 2;
 }
+
+message StorableFloat {
+    syft.core.common.UID id = 1;
+    Float data = 2;
+    string description = 3;
+    repeated string tags = 4;
+}

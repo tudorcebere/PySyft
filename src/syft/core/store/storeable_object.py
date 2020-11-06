@@ -24,7 +24,7 @@ from ..common.storeable_object import AbstractStorableObject
 from ..common.uid import UID
 
 
-class StorableObject(AbstractStorableObject):
+class BytesStorableObject(AbstractStorableObject):
     """
     StorableObject is a wrapper over some Serializable objects, which we want to keep in an
     ObjectStore. The Serializable objects that we want to store have to be backed up in syft-proto
@@ -118,15 +118,13 @@ class StorableObject(AbstractStorableObject):
         klass_name = parts.pop()
         obj_type = getattr(sys.modules[".".join(parts)], klass_name)
 
-        # Step 4: get the protobuf type we deserialize for .data
         schematic_type = obj_type.get_protobuf_schema()
 
-        # Step 4: Deserialize data from protobuf
         data = schematic_type()
         descriptor = getattr(schematic_type, "DESCRIPTOR", None)
         if descriptor is not None and proto.data.Is(descriptor):
             proto.data.Unpack(data)
-        # if issubclass(type(target_type), Serializable):
+
         data = obj_type._proto2object(proto=data)
 
         # Step 5: get the description from proto
@@ -137,13 +135,9 @@ class StorableObject(AbstractStorableObject):
         if proto.tags:
             tags = list(proto.tags)
 
-        result = StorableObject.construct_new_object(
+        result = BytesStorableObject.construct_new_object(
             id=id, data=data, tags=tags, description=description
         )
-
-        # just a backup
-        result.tags = tags
-        result.description = description
 
         return result
 
