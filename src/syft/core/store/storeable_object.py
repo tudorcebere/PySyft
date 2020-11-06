@@ -1,5 +1,6 @@
 # stdlib
 import pydoc
+import sys
 from typing import Dict
 from typing import List
 from typing import Optional
@@ -55,14 +56,30 @@ class StorableObject(AbstractStorableObject):
         self,
         id: UID,
         data: object,
-        description: Optional[str] = "",
-        tags: Optional[List[str]] = [],
+        description: Optional[str] = None,
+        tags: Optional[List[str]] = None,
         read_permissions: Optional[Dict[VerifyKey, Optional[UID]]] = {},
         search_permissions: Optional[Dict[Union[VerifyKey, All], Optional[UID]]] = {},
     ):
         self.id = id
         self.data = data
-        self.description = description
+
+        if description is not None:
+            self.description: str = description
+        else:
+            if hasattr(data, "description"):
+                self.description = data.description
+            else:
+                self.description = ""
+
+        if tags is not None:
+            self.tags = tags
+        else:
+            if hasattr(data, "tags"):
+                self.tags: list = data.tags
+            else:
+                self.tags: list = []
+
         self.tags = tags
 
         # the dict key of "verify key" objects corresponding to people
@@ -77,68 +94,41 @@ class StorableObject(AbstractStorableObject):
 
     @syft_decorator(typechecking=True)
     def _object2proto(self) -> StorableObject_PB:
-
         proto = StorableObject_PB()
-
-        # Step 1: Serialize the id to protobuf and copy into protobuf
         id = self.id.serialize()
         proto.id.CopyFrom(id)
-
-        # # Step 2: save the type of object we're about to serialize
-        # proto.schematic_qualname = get_fully_qualified_name(obj=self.data)
-        # print("Underlying Object Type:" + str(proto.schematic_qualname))
-
-        # Step 3: Save the type of wrapper to use to deserialize
-        proto.obj_type = get_fully_qualified_name(obj=self)
-
-        # Step 4: Serialize data to protobuf and pack into proto
+        proto.obj_type = get_fully_qualified_name(obj=self.data)
         data = self._data_object2proto()
         proto.data.Pack(data)
 
-        if hasattr(self.data, "description"):
-            # Step 5: save the description into proto
-            proto.description = self.data.description  # type: ignore
+        proto.description = self.description
 
-        # QUESTION: Which one do we want, self.data.tags or self.tags or both???
-        if hasattr(self.data, "tags"):
-            # Step 6: save tags into proto if they exist
-            if self.data.tags is not None and self.tags is not None:  # type: ignore
-                for tag in self.tags:
-                    proto.tags.append(tag)
+        for tag in self.tags:
+            proto.tags.append(tag)
 
         return proto
 
     @staticmethod
     @syft_decorator(typechecking=True)
     def _proto2object(proto: StorableObject_PB) -> object:
-        # Step 1: deserialize the ID
         id = _deserialize(blob=proto.id)
 
-        # Step 2: get the type of object we're about to serialize
-        # data_type = pydoc.locate(proto.schematic_qualname)
-        # # from syft.proto.lib.numpy.tensor_pb2 import TensorProto
-        #
-        # schematic_type = data_type
-
-        # TODO: FIX THIS SECURITY BUG!!! WE CANNOT USE
-        #  PYDOC.LOCATE!!!
-        # Step 3: get the type of wrapper to use to deserialize
-        obj_type: StorableObject = pydoc.locate(proto.obj_type)  # type: ignore
-        target_type = obj_type
+        fqn = proto.obj_type
+        parts = fqn.split(".")
+        klass_name = parts.pop()
+        obj_type = getattr(sys.modules[".".join(parts)], klass_name)
 
         # Step 4: get the protobuf type we deserialize for .data
-        schematic_type = obj_type.get_data_protobuf_schema()
+        schematic_type = obj_type.get_protobuf_schema()
 
         # Step 4: Deserialize data from protobuf
-        if schematic_type is not None and callable(schematic_type):
-            data = schematic_type()
-            descriptor = getattr(schematic_type, "DESCRIPTOR", None)
-            if descriptor is not None and proto.data.Is(descriptor):
-                proto.data.Unpack(data)
-            # if issubclass(type(target_type), Serializable):
-            data = target_type._data_proto2object(proto=data)
-        else:
-            data = None
+        data = schematic_type()
+        descriptor = getattr(schematic_type, "DESCRIPTOR", None)
+        if descriptor is not None and proto.data.Is(descriptor):
+            proto.data.Unpack(data)
+        # if issubclass(type(target_type), Serializable):
+        data = obj_type._proto2object(proto=data)
+
         # Step 5: get the description from proto
         description = proto.description
 
@@ -147,7 +137,7 @@ class StorableObject(AbstractStorableObject):
         if proto.tags:
             tags = list(proto.tags)
 
-        result = target_type.construct_new_object(
+        result = StorableObject.construct_new_object(
             id=id, data=data, tags=tags, description=description
         )
 
