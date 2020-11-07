@@ -3,7 +3,7 @@ from ..ast.globals import Globals
 from ..lib.python import create_python_ast
 from ..lib.torch import create_torch_ast
 from ..lib.torchvision import create_torchvision_ast
-
+from ..lib.misc import misc_ast
 
 # now we need to load the relevant frameworks onto the node
 def create_lib_ast() -> Globals:
@@ -17,7 +17,9 @@ def create_lib_ast() -> Globals:
     lib_ast.add_attr(attr_name="syft", attr=python_ast.attrs["syft"])
     lib_ast.add_attr(attr_name="torch", attr=torch_ast.attrs["torch"])
     lib_ast.add_attr(attr_name="torchvision", attr=torchvision_ast.attrs["torchvision"])
-    # lib_ast.add_attr(attr_name="numpy", attr=numpy_ast.attrs["numpy"])
+    lib_ast.add_attr(
+        attr_name="misc", attr=misc_ast.attrs["misc"]
+    )
 
     return lib_ast
 

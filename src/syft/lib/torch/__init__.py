@@ -11,7 +11,6 @@ from . import parameter  # noqa: 401
 from . import uppercase_tensor  # noqa: 401
 from ...ast.globals import Globals
 from .allowlist import allowlist
-from ..misc.union import PointerUnion
 
 TORCH_VERSION = version.parse(torch.__version__.split("+")[0])
 

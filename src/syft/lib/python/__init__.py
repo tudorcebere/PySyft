@@ -62,6 +62,7 @@ def add_modules(ast: Globals, modules: TypeList[str]) -> None:
 def add_classes(ast: Globals, paths: TypeList[TypeTuple[str, str, Any]]) -> None:
     for path, return_type, ref in paths:
         parent = get_parent(path, ast)
+
         attr_name = path.rsplit(".", 1)[-1]
 
         parent.add_attr(

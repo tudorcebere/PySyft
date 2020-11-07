@@ -54,3 +54,7 @@ class Any:
     @syft_decorator(typechecking=True, prohibit_args=False)
     def __rsub__(self, other: TypeAny) -> SyPrimitiveRet:
         return other - self
+
+    @syft_decorator(typechecking=True, prohibit_args=False)
+    def __abs__(self):
+        return abs(self)
