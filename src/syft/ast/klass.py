@@ -66,13 +66,10 @@ class Class(Callable):
                 return_type_name = __self.client.lib_ast(
                     attr_path_and_name, return_callable=True
                 ).return_type_name
-                print(return_type_name)
                 resolved_pointer_type = __self.client.lib_ast(
                     return_type_name, return_callable=True
                 )
-                print(resolved_pointer_type)
                 result = resolved_pointer_type.pointer_type(client=__self.client)
-                print(result)
                 # QUESTION can the id_at_location be None?
                 result_id_at_location = getattr(result, "id_at_location", None)
                 if result_id_at_location is not None:

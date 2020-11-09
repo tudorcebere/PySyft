@@ -35,7 +35,7 @@ class Module(ast.attribute.Attribute):
     ) -> Optional[Union[Callable, CallableT]]:
         if isinstance(path, str):
             path = path.split(".")
-        print(path[index])
+        print(path)
         return self.attrs[path[index]](
             path=path, index=index + 1, return_callable=return_callable
         )

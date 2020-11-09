@@ -1,14 +1,16 @@
 # stdlib
 from typing import Dict
 from typing import Union
-# from ..misc.union import PointerUnion
+from ..misc.union import PointerUnion
 
 allowlist: Dict[str, Union[str, Dict[str, str]]] = {}  # (path: str, return_type:type)
 
 # --------------------------------------------------------------------------------------
 # SECTION - Tensor methods which are intentionally disabled
 # --------------------------------------------------------------------------------------
-allowlist["torch.Tensor.item"] = "misc.union.Any"
+
+allowlist["torch.Tensor.item"] = PointerUnion.from_qualnames()[0]
+
 # PointerUnion.from_qualnames(
 #     "syft.lib.python.Float", "syft.lib.python.Int", "syft.lib.python.Bool"
 # )[0]
