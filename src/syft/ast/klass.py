@@ -86,7 +86,7 @@ def wrap_len(attrs: Dict[str, Union[str, CallableT]]) -> None:
         def __len__(self: Any) -> int:
             data_len_ptr = len_func(self)
             try:
-                data_len = data_len_ptr.get(**self.get_request_config())
+                data_len = data_len_ptr.get()
                 return data_len
             except Exception:
                 raise ValueError("Request to access data length not granted.")

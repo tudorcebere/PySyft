@@ -100,38 +100,38 @@ class StorableObject(AbstractStorableObject):
         id = self.id.serialize()
         proto.id.CopyFrom(id)
 
-        # Step 2: Save the type of wrapper to use to deserialize
-        proto.obj_type = get_fully_qualified_name(obj=self)
-
-        # Step 3: Serialize data to protobuf and pack into proto
-        data = self._data_object2proto()
-
-        proto.data.Pack(data)
-
-        if hasattr(self, "description"):
-            # Step 4: save the description into proto
-            proto.description = self.description
-
-        # QUESTION: Which one do we want, self.data.tags or self.tags or both???
-        if hasattr(self, "tags"):
-            # Step 5: save tags into proto if they exist
-            if self.tags is not None:
-                for tag in self.tags:
-                    proto.tags.append(tag)
-
-        # Step 6: save read permissions
-        if len(self.read_permissions.keys()) > 0:
-            permission_data = sy.lib.python.Dict()
-            for k, v in self.read_permissions.items():
-                permission_data[k] = v
-            proto.read_permissions = permission_data.serialize(to_bytes=True)
-
-        # Step 7: save search permissions
-        if len(self.search_permissions.keys()) > 0:
-            permission_data = sy.lib.python.Dict()
-            for k, v in self.search_permissions.items():
-                permission_data[k] = v
-            proto.search_permissions = permission_data.serialize(to_bytes=True)
+        # # Step 2: Save the type of wrapper to use to deserialize
+        # proto.obj_type = get_fully_qualified_name(obj=self)
+        #
+        # # Step 3: Serialize data to protobuf and pack into proto
+        # data = self._data_object2proto()
+        #
+        # proto.data.Pack(data)
+        #
+        # if hasattr(self, "description"):
+        #     # Step 4: save the description into proto
+        #     proto.description = self.description
+        #
+        # # QUESTION: Which one do we want, self.data.tags or self.tags or both???
+        # if hasattr(self, "tags"):
+        #     # Step 5: save tags into proto if they exist
+        #     if self.tags is not None:
+        #         for tag in self.tags:
+        #             proto.tags.append(tag)
+        #
+        # # Step 6: save read permissions
+        # if len(self.read_permissions.keys()) > 0:
+        #     permission_data = sy.lib.python.Dict()
+        #     for k, v in self.read_permissions.items():
+        #         permission_data[k] = v
+        #     proto.read_permissions = permission_data.serialize(to_bytes=True)
+        #
+        # # Step 7: save search permissions
+        # if len(self.search_permissions.keys()) > 0:
+        #     permission_data = sy.lib.python.Dict()
+        #     for k, v in self.search_permissions.items():
+        #         permission_data[k] = v
+        #     proto.search_permissions = permission_data.serialize(to_bytes=True)
 
         return proto
 
@@ -140,71 +140,71 @@ class StorableObject(AbstractStorableObject):
     def _proto2object(proto: StorableObject_PB) -> object:
         # Step 1: deserialize the ID
         id = _deserialize(blob=proto.id)
-
-        # TODO: FIX THIS SECURITY BUG!!! WE CANNOT USE
-        #  PYDOC.LOCATE!!!
-        # Step 2: get the type of wrapper to use to deserialize
-        obj_type: StorableObject = pydoc.locate(proto.obj_type)  # type: ignore
-
-        # this happens if we have a special ProtobufWrapper type
-        # need a different way to get obj_type
-        if proto.obj_type.endswith("ProtobufWrapper"):
-            module_parts = proto.obj_type.split(".")
-            klass = module_parts.pop().replace("ProtobufWrapper", "")
-            proto_type = getattr(sys.modules[".".join(module_parts)], klass)
-            obj_type = proto_type.serializable_wrapper_type
-
-        # Step 3: get the protobuf type we deserialize for .data
-        schematic_type = obj_type.get_data_protobuf_schema()
-
-        # Step 4: Deserialize data from protobuf
-        data = None
-        if callable(schematic_type):
-            data = schematic_type()
-            descriptor = getattr(schematic_type, "DESCRIPTOR", None)
-            if descriptor is not None and proto.data.Is(descriptor):
-                proto.data.Unpack(data)
-            data = obj_type._data_proto2object(proto=data)
-
-        # Step 5: get the description from proto
-        description = proto.description if proto.description else ""
-
-        # Step 6: get the tags from proto of they exist
-        tags = list(proto.tags) if proto.tags else []
-
-        result = obj_type.construct_new_object(
-            id=id, data=data, tags=tags, description=description
-        )
-
-        # just a backup
-        try:
-            result.tags = tags
-            result.description = description
-
-            # default to empty
-            result.read_permissions = {}
-            result.search_permissions = {}
-
-            # Step 7: get the read permissions
-            if proto.read_permissions is not None and len(proto.read_permissions) > 0:
-                result.read_permissions = _deserialize(
-                    blob=proto.read_permissions, from_bytes=True
-                )
-
-            # Step 8: get the search permissions
-            if (
-                proto.search_permissions is not None
-                and len(proto.search_permissions) > 0
-            ):
-                result.search_permissions = _deserialize(
-                    blob=proto.search_permissions, from_bytes=True
-                )
-        except Exception as e:
-            # torch.return_types.* namedtuple cant setattr
-            log = f"StorableObject {type(obj_type)} cant set attributes {e}"
-            logger.error(log)
-
-        return result
+        return StorableObject(id=id)
+        # # TODO: FIX THIS SECURITY BUG!!! WE CANNOT USE
+        # #  PYDOC.LOCATE!!!
+        # # Step 2: get the type of wrapper to use to deserialize
+        # obj_type: StorableObject = pydoc.locate(proto.obj_type)  # type: ignore
+        #
+        # # this happens if we have a special ProtobufWrapper type
+        # # need a different way to get obj_type
+        # if proto.obj_type.endswith("ProtobufWrapper"):
+        #     module_parts = proto.obj_type.split(".")
+        #     klass = module_parts.pop().replace("ProtobufWrapper", "")
+        #     proto_type = getattr(sys.modules[".".join(module_parts)], klass)
+        #     obj_type = proto_type.serializable_wrapper_type
+        #
+        # # Step 3: get the protobuf type we deserialize for .data
+        # schematic_type = obj_type.get_data_protobuf_schema()
+        #
+        # # Step 4: Deserialize data from protobuf
+        # data = None
+        # if callable(schematic_type):
+        #     data = schematic_type()
+        #     descriptor = getattr(schematic_type, "DESCRIPTOR", None)
+        #     if descriptor is not None and proto.data.Is(descriptor):
+        #         proto.data.Unpack(data)
+        #     data = obj_type._data_proto2object(proto=data)
+        #
+        # # Step 5: get the description from proto
+        # description = proto.description if proto.description else ""
+        #
+        # # Step 6: get the tags from proto of they exist
+        # tags = list(proto.tags) if proto.tags else []
+        #
+        # result = obj_type.construct_new_object(
+        #     id=id, data=data, tags=tags, description=description
+        # )
+        #
+        # # just a backup
+        # try:
+        #     result.tags = tags
+        #     result.description = description
+        #
+        #     # default to empty
+        #     result.read_permissions = {}
+        #     result.search_permissions = {}
+        #
+        #     # Step 7: get the read permissions
+        #     if proto.read_permissions is not None and len(proto.read_permissions) > 0:
+        #         result.read_permissions = _deserialize(
+        #             blob=proto.read_permissions, from_bytes=True
+        #         )
+        #
+        #     # Step 8: get the search permissions
+        #     if (
+        #         proto.search_permissions is not None
+        #         and len(proto.search_permissions) > 0
+        #     ):
+        #         result.search_permissions = _deserialize(
+        #             blob=proto.search_permissions, from_bytes=True
+        #         )
+        # except Exception as e:
+        #     # torch.return_types.* namedtuple cant setattr
+        #     log = f"StorableObject {type(obj_type)} cant set attributes {e}"
+        #     logger.error(log)
+        #
+        # return result
 
     def _data_object2proto(self) -> Message:
         return self.data.serialize()  # type: ignore
